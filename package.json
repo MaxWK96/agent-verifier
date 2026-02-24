@@ -1,0 +1,42 @@
+{
+  "name": "agent-verifier",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "agent": "tsx src/agent/index.ts",
+    "agent:once": "tsx src/agent/index.ts --once",
+    "agent:demo": "tsx src/agent/index.ts --demo",
+    "seed": "tsx scripts/seed-claim.ts",
+    "register": "tsx scripts/register-agent.ts",
+    "delete-comment": "tsx scripts/delete-comment.ts",
+    "compile": "npx hardhat compile",
+    "deploy:contract": "npx hardhat run scripts/deploy-verdict-registry.ts --network sepolia"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.24",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.0",
+    "framer-motion": "^12.34.3",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "hardhat": "^2.22.0",
+    "tailwindcss": "^3.4.19",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

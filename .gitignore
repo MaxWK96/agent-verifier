@@ -1,0 +1,25 @@
+# Env
+.env
+.env.local
+
+# Node
+node_modules/
+dist-agent/
+dist-hardhat/
+
+# Next.js
+.next/
+out/
+
+# Hardhat
+artifacts/
+cache-hardhat/
+typechain-types/
+
+# Memory (runtime state — not committed)
+memory/verdicts.json
+memory/verified-posts.json
+
+# OS
+.DS_Store
+Thumbs.db

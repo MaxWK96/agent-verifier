@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    --background: 40 28% 88%;
+    --foreground: 30 15% 10%;
+
+    --card: 38 25% 83%;
+    --card-foreground: 30 15% 10%;
+
+    --popover: 40 28% 88%;
+    --popover-foreground: 30 15% 10%;
+
+    --primary: 14 85% 50%;
+    --primary-foreground: 40 30% 97%;
+
+    --secondary: 230 72% 44%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 38 18% 76%;
+    --muted-foreground: 30 10% 40%;
+
+    --accent: 160 60% 34%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 60% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 42 95% 50%;
+    --warning-foreground: 30 15% 10%;
+
+    --border: 34 20% 72%;
+    --input: 34 20% 72%;
+    --ring: 14 85% 50%;
+
+    --radius: 0.625rem;
+
+    --hero-gradient-start: 14 85% 50%;
+    --hero-gradient-end: 230 72% 44%;
+
+    --sidebar-background: 38 25% 83%;
+    --sidebar-foreground: 30 15% 10%;
+    --sidebar-primary: 14 85% 50%;
+    --sidebar-primary-foreground: 40 30% 97%;
+    --sidebar-accent: 38 18% 76%;
+    --sidebar-accent-foreground: 30 15% 10%;
+    --sidebar-border: 34 20% 72%;
+    --sidebar-ring: 14 85% 50%;
+
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  code, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-blob {
+    background: radial-gradient(
+      ellipse at center,
+      hsl(var(--primary) / 0.35) 0%,
+      hsl(var(--secondary) / 0.2) 40%,
+      transparent 70%
+    );
+  }
+
+  .gradient-blob-accent {
+    background: radial-gradient(
+      ellipse at center,
+      hsl(var(--accent) / 0.25) 0%,
+      hsl(var(--warning) / 0.15) 40%,
+      transparent 70%
+    );
+  }
+
+  .hero-gradient-bg {
+    background: linear-gradient(
+      160deg,
+      hsl(var(--background)) 0%,
+      hsl(38 30% 85%) 30%,
+      hsl(30 35% 82%) 60%,
+      hsl(var(--background)) 100%
+    );
+  }
+
+  .section-dark {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.3), 0 0 80px hsl(var(--primary) / 0.1);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 40px hsl(var(--secondary) / 0.25), 0 0 80px hsl(var(--secondary) / 0.08);
+  }
+
+  .stamp {
+    border: 2.5px solid currentColor;
+    padding: 0.2em 0.6em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transform: rotate(-3deg);
+    display: inline-block;
+  }
+
+  .marquee-track {
+    display: flex;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%       { transform: translateY(-18px) scale(1.03); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.08); }
+  }
+
+  @keyframes gradient-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .float-slow   { animation: float 7s   ease-in-out infinite; }
+  .float-medium { animation: float 5s   ease-in-out infinite 1s; }
+  .float-fast   { animation: float 3.5s ease-in-out infinite 0.5s; }
+  .pulse-glow   { animation: pulse-glow 3s ease-in-out infinite; }
+  .gradient-animate {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+}
