@@ -91,45 +91,53 @@ async function verifyPriceClaim(claim: ParsedClaim): Promise<VerificationResult>
 
 // ─── Weather ──────────────────────────────────────────────────────────────────
 
+/** Extract a city name that appears just before a weather term in the claim text. */
+function extractCity(text: string): string {
+  const match = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:precipitation|weather|rain|flooding|snow)/i
+    .exec(text);
+  return match ? match[1] : "Stockholm";
+}
+
 async function verifyWeatherClaim(claim: ParsedClaim): Promise<VerificationResult> {
   const key = process.env.OPENWEATHER_API_KEY;
   if (!key) {
     return unverifiable("OpenWeatherMap", "OPENWEATHER_API_KEY not configured");
   }
 
-  // Default to London — no location extracted from claim
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${key}&units=metric`;
+  const city = extractCity(claim.claimText);
+
+  // Use 5-day/3-hour forecast endpoint — provides `pop` (probability of precipitation, 0-1)
+  // cnt=16 covers the next 48 hours (16 × 3h periods)
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${key}&units=metric&cnt=16`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`OpenWeatherMap ${res.status}: ${await res.text()}`);
 
   const data = await res.json();
-  // Convert rain volume to rough probability (0-100)
-  const rainVol: number = data.rain?.["1h"] ?? data.rain?.["3h"] ?? 0;
-  const snowVol: number = data.snow?.["1h"] ?? data.snow?.["3h"] ?? 0;
-  const precipPct = Math.min(100, (rainVol + snowVol) * 25);
-  const weatherId: number = data.weather?.[0]?.id ?? 800;
-  // Supplement with weather condition codes: 2xx thunderstorm, 3xx drizzle, 5xx rain, 6xx snow
-  const actualPct = weatherId < 700 ? Math.max(precipPct, 60) : precipPct;
+  const list: Array<{ pop?: number }> = data.list ?? [];
+
+  // Take the maximum precipitation probability over the forecast window
+  const maxPop    = list.reduce((max, item) => Math.max(max, item.pop ?? 0), 0);
+  const precipPct = Math.round(maxPop * 100);
 
   if (claim.extractedValue === null) {
     return unverifiable(
       "OpenWeatherMap",
-      `Current precipitation estimate for London: ${actualPct.toFixed(0)}%`
+      `Max precipitation probability (${city}, next 48h): ${precipPct}%`
     );
   }
 
   const claimed = claim.extractedValue;
-  const diff = Math.abs(actualPct - claimed);
+  const diff    = Math.abs(precipPct - claimed);
 
   const verdict: VerificationResult["verdict"] =
-    diff > 20 ? (actualPct >= claimed ? "TRUE" : "FALSE") : "UNVERIFIABLE";
+    diff > 20 ? (precipPct >= claimed ? "TRUE" : "FALSE") : "UNVERIFIABLE";
 
   return {
     verdict,
-    confidence: diff > 20 ? 85 : 65,
-    source: "OpenWeatherMap",
-    currentValue: actualPct,
-    details: `Precipitation estimate (London): ${actualPct.toFixed(0)}% | claimed: ${claimed}%`,
+    confidence:   diff > 20 ? 85 : 65,
+    source:       "OpenWeatherMap",
+    currentValue: precipPct,
+    details:      `Max precipitation probability (${city}, next 48h): ${precipPct}% | claimed: ${claimed}%`,
   };
 }
 

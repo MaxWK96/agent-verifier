@@ -14,6 +14,7 @@
     "agent:demo:preview": "tsx src/agent/index.ts --demo --preview",
     "seed": "tsx scripts/seed-claim.ts",
     "register": "tsx scripts/register-agent.ts",
+    "cleanup": "tsx scripts/cleanup.ts",
     "delete-comment": "tsx scripts/delete-comment.ts",
     "compile": "npx hardhat compile",
     "deploy:contract": "npx hardhat run scripts/deploy-verdict-registry.ts --network sepolia"

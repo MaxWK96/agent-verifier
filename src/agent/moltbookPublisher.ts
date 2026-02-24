@@ -97,17 +97,31 @@ export async function postToMoltbook(
 
 // ─── Comment building + posting ───────────────────────────────────────────────
 
-/** Build the verdict comment text (does NOT post anything). */
+/**
+ * Build the verdict comment text (does NOT post anything).
+ * @param txHash  Real tx hash string, or null if on-chain proof failed.
+ */
 export function buildVerdictComment(
   claim:   ParsedClaim,
   result:  VerificationResult,
-  txHash:  string
+  txHash:  string | null
 ): string {
-  const shortTx    = `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
-  const valueLabel = claim.asset ?? "value";
-  const valueStr   = result.currentValue !== null
-    ? `Current ${valueLabel}: $${result.currentValue.toLocaleString("en-US")} (${result.source})`
-    : result.details;
+  const ZERO_HASH = "0x" + "0".repeat(64);
+
+  // Proof line — show shortened hash or a failure notice
+  const proofLine = (txHash && txHash !== ZERO_HASH)
+    ? `On-chain proof: ${txHash.slice(0, 6)}...${txHash.slice(-4)} (Sepolia)`
+    : `On-chain proof: failed - check Sepolia balance`;
+
+  // Value line — only use $ prefix for price claims
+  let valueStr: string;
+  if (result.currentValue !== null && claim.claimType === "price") {
+    const label = claim.asset ?? "value";
+    valueStr = `Current ${label}: $${result.currentValue.toLocaleString("en-US")} (${result.source})`;
+  } else {
+    // For weather / DeFi / gas: result.details is already properly formatted with % or gwei
+    valueStr = result.details;
+  }
 
   return (
     `🔍 CRE FACT-CHECK\n` +
@@ -115,7 +129,7 @@ export function buildVerdictComment(
     `Claim: "${claim.claimText.slice(0, 120)}"\n` +
     `${valueStr}\n` +
     `Source: ${result.source}\n` +
-    `On-chain proof: ${shortTx} (Sepolia)\n` +
+    `${proofLine}\n` +
     `Verified by: Chainlink CRE Fact-Checker`
   );
 }
@@ -153,7 +167,7 @@ export async function postVerdictComment(
 export async function postVerdict(
   claim:   ParsedClaim,
   result:  VerificationResult,
-  txHash:  string
+  txHash:  string | null
 ): Promise<string | null> {
   const comment = buildVerdictComment(claim, result, txHash);
   return postVerdictComment(claim.postId, comment);

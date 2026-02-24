@@ -142,21 +142,25 @@ async function runCycle(): Promise<void> {
       );
 
       // On-chain proof (non-blocking)
-      let txHash      = "0x" + "0".repeat(64);
-      let verdictHash = txHash;
+      const ZERO      = "0x" + "0".repeat(64);
+      let txHash      = ZERO;        // stored in DB (zero hash if proof failed)
+      let verdictHash = ZERO;
+      let proofHash: string | null = null;  // null = failed → comment shows failure notice
       try {
         const proof = await storeVerdictOnChain(claim.postId, result.verdict, result.confidence);
         txHash      = proof.txHash;
         verdictHash = proof.verdictHash;
+        proofHash   = proof.txHash;
         console.log(`     ⛓  On-chain proof: ${txHash}`);
       } catch (err) {
-        console.warn(`     ⚠  On-chain proof skipped: ${errorMsg(err)}`);
+        console.warn(`     ⚠  On-chain proof failed: ${errorMsg(err)}`);
+        // proofHash stays null → comment will say "failed - check Sepolia balance"
       }
 
       // Build comment, optionally preview, then post
       let commentId: string | undefined;
       try {
-        const commentText = buildVerdictComment(claim, result, txHash);
+        const commentText = buildVerdictComment(claim, result, proofHash);
 
         let shouldPost = true;
         if (PREVIEW_MODE) {

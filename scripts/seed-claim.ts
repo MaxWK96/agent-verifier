@@ -56,20 +56,23 @@ async function main(): Promise<void> {
 
   // 4. Store on-chain proof (Sepolia)
   console.log("3/4  Storing verdict on-chain (Sepolia)…");
-  let txHash      = "0x" + "0".repeat(64);
-  let verdictHash = txHash;
+  const ZERO      = "0x" + "0".repeat(64);
+  let txHash      = ZERO;
+  let verdictHash = ZERO;
+  let proofHash: string | null = null;
   try {
     const proof = await storeVerdictOnChain(postId, result.verdict, result.confidence);
     txHash      = proof.txHash;
     verdictHash = proof.verdictHash;
+    proofHash   = proof.txHash;
     console.log(`     ⛓  tx: ${txHash}`);
   } catch (err) {
-    console.warn(`     ⚠  On-chain proof skipped: ${err instanceof Error ? err.message : err}`);
+    console.warn(`     ⚠  On-chain proof failed: ${err instanceof Error ? err.message : err}`);
   }
 
   // 5. Post verdict comment to the real Moltbook post
   console.log("4/4  Posting verdict comment to Moltbook…");
-  const commentText = buildVerdictComment(claim, result, txHash);
+  const commentText = buildVerdictComment(claim, result, proofHash);
   console.log("     Comment preview:");
   commentText.split("\n").forEach((line) => console.log(`     │ ${line}`));
 
