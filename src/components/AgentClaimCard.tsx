@@ -69,13 +69,26 @@ const AgentClaimCard = ({ claim, darkMode }: { claim: ClaimData; darkMode?: bool
             {claim.creSource}
           </span>
           {claim.evidenceHash && (
-            <span
-              className={`underline decoration-dotted underline-offset-2 cursor-pointer transition-colors ${
-                darkMode ? "hover:text-background/70" : "hover:text-foreground"
-              }`}
-            >
-              {claim.evidenceHash}
-            </span>
+            claim.txHash ? (
+              <a
+                href={`https://sepolia.etherscan.io/tx/${claim.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`underline decoration-dotted underline-offset-2 transition-colors ${
+                  darkMode ? "hover:text-background/70" : "hover:text-foreground"
+                }`}
+              >
+                {claim.evidenceHash} ↗
+              </a>
+            ) : (
+              <span
+                className={`underline decoration-dotted underline-offset-2 ${
+                  darkMode ? "text-background/40" : "text-muted-foreground"
+                }`}
+              >
+                {claim.evidenceHash}
+              </span>
+            )
           )}
         </div>
       )}

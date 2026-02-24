@@ -2,6 +2,7 @@ import * as fs   from "fs";
 import * as path from "path";
 import type { ParsedClaim }       from "./claimParser";
 import type { VerificationResult } from "./creVerifier";
+import { writeBin } from "../lib/jsonbin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -123,13 +124,13 @@ export async function postVerdict(
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
-export function saveVerdict(
+export async function saveVerdict(
   claim:       ParsedClaim,
   result:      VerificationResult,
   txHash:      string,
   verdictHash: string,
   commentId?:  string
-): void {
+): Promise<void> {
   const verdicts: StoredVerdict[] = loadJson(VERDICTS_FILE, []);
 
   verdicts.unshift({
@@ -147,5 +148,10 @@ export function saveVerdict(
   });
 
   // Keep last 100 to prevent unbounded growth
-  saveJson(VERDICTS_FILE, verdicts.slice(0, 100));
+  const trimmed = verdicts.slice(0, 100);
+  saveJson(VERDICTS_FILE, trimmed);
+
+  // Mirror to JSONBin so the live Vercel deployment sees real verdicts
+  const ok = await writeBin(trimmed).catch(() => false);
+  console.log(`     ☁  JSONBin sync: ${ok ? "✓ synced" : "skipped (no credentials)"}`);
 }

@@ -23,3 +23,5 @@ memory/verified-posts.json
 # OS
 .DS_Store
 Thumbs.db
+
+.vercel

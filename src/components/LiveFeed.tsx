@@ -5,15 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import AgentClaimCard from "./AgentClaimCard";
 
 export interface ClaimData {
-  id:          string;
-  agent:       string;
-  agentType:   "trader" | "risk" | "checker";
-  claim:       string;
-  timestamp:   string;
-  verdict?:    "TRUE" | "FALSE" | "PENDING";
-  confidence?: number;
-  creSource?:  string;
+  id:            string;
+  agent:         string;
+  agentType:     "trader" | "risk" | "checker";
+  claim:         string;
+  timestamp:     string;
+  verdict?:      "TRUE" | "FALSE" | "PENDING";
+  confidence?:   number;
+  creSource?:    string;
   evidenceHash?: string;
+  txHash?:       string; // full tx hash for Etherscan link
 }
 
 // ─── Fallback mock data (shown when API returns nothing yet) ─────────────────
@@ -105,6 +106,7 @@ function toClaimData(v: ApiVerdict): ClaimData {
     confidence:   v.confidence,
     creSource:    v.source,
     evidenceHash: hash,
+    txHash:       v.txHash !== ZERO_HASH ? v.txHash : undefined,
   };
 }
 

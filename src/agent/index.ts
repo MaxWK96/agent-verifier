@@ -121,8 +121,8 @@ async function runCycle(): Promise<void> {
         console.warn(`     ⚠  Moltbook comment failed: ${errorMsg(err)}`);
       }
 
-      // 3e. Persist
-      saveVerdict(claim, result, txHash, verdictHash, commentId);
+      // 3e. Persist locally + sync to JSONBin
+      await saveVerdict(claim, result, txHash, verdictHash, commentId);
       markAsVerified(claim.postId);
 
       // Courtesy delay between posts to avoid hammering APIs
