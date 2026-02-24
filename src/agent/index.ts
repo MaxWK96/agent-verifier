@@ -1,4 +1,5 @@
 import "dotenv/config";
+import * as readline from "readline";
 
 import type { ParsedClaim } from "./claimParser";
 import { fetchMoltbookPosts, extractClaims } from "./claimParser";
@@ -7,62 +8,104 @@ import { storeVerdictOnChain }                from "./onChainProof";
 import {
   isAlreadyVerified,
   markAsVerified,
-  postVerdict,
+  postToMoltbook,
+  buildVerdictComment,
+  postVerdictComment,
   saveVerdict,
 } from "./moltbookPublisher";
 
-const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-const RUN_ONCE    = process.argv.includes("--once");
-const DEMO_MODE   = process.argv.includes("--demo");
+const INTERVAL_MS  = 10 * 60 * 1000;
+const RUN_ONCE     = process.argv.includes("--once");
+const DEMO_MODE    = process.argv.includes("--demo");
+const PREVIEW_MODE = process.argv.includes("--preview");
 
-// ─── Demo claims ─────────────────────────────────────────────────────────────
-// Injected instead of live Moltbook feed when --demo is passed.
+// ─── Demo claim templates ─────────────────────────────────────────────────────
+// In demo mode these are posted as real Moltbook posts so we get real post IDs.
 
-const DEMO_CLAIMS: ParsedClaim[] = [
+interface DemoTemplate {
+  title:          string;
+  content:        string;
+  submolt:        string;
+  claimType:      ParsedClaim["claimType"];
+  extractedValue: number | null;
+  asset:          string | null;
+}
+
+const DEMO_TEMPLATES: DemoTemplate[] = [
   {
-    postId:         "demo-001",
-    agentName:      "demo-agent",
+    title:          "ETH price prediction: will exceed $3,500 by end of week",
+    content:        "ETH will exceed $3,500 by Sunday based on current momentum indicators and increasing institutional demand.",
+    submolt:        "chainlink-official",
     claimType:      "price",
-    claimText:      "ETH will exceed $3,500 by end of week",
     extractedValue: 3500,
     asset:          "ETH",
   },
   {
-    postId:         "demo-002",
-    agentName:      "demo-agent",
+    title:          "Stockholm weather alert: >70% precipitation probability next 48h",
+    content:        "Stockholm precipitation probability >70% next 48h — flooding risk elevated due to persistent low-pressure system moving in from the Atlantic.",
+    submolt:        "chainlink-official",
     claimType:      "weather",
-    claimText:      "Stockholm precipitation probability >70% next 48h",
     extractedValue: 70,
     asset:          null,
   },
   {
-    postId:         "demo-003",
-    agentName:      "demo-agent",
+    title:          "Aave V3 circuit breaker alert",
+    content:        "Aave V3 TVL dropped 20% in 6h — circuit breaker threshold approaching. Protocol health factor declining rapidly.",
+    submolt:        "chainlink-official",
     claimType:      "defi",
-    claimText:      "Aave V3 TVL dropped 20% in 6h — circuit breaker threshold approaching",
     extractedValue: 20,
     asset:          null,
   },
 ];
 
-// ─── Single cycle ────────────────────────────────────────────────────────────
+// ─── Preview helper ───────────────────────────────────────────────────────────
+
+function askYesNo(question: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === "y");
+    });
+  });
+}
+
+// ─── Single cycle ─────────────────────────────────────────────────────────────
 
 async function runCycle(): Promise<void> {
   console.log(`\n[${new Date().toISOString()}] ── Starting fact-check cycle ──`);
+  if (PREVIEW_MODE) console.log("  👁  PREVIEW MODE — will confirm each comment before posting");
 
-  // 1. Collect claims — live feed or demo injection
   let claims: ParsedClaim[];
 
   if (DEMO_MODE) {
-    console.log("  🎭 DEMO MODE — using hardcoded test claims (no Moltbook fetch)");
-    // Filter out already-verified demo posts so re-runs don't skip them
-    claims = DEMO_CLAIMS.filter((c) => !isAlreadyVerified(c.postId));
-    console.log(`  ✔ ${claims.length} demo claim(s) queued`);
+    console.log("  🎭 DEMO MODE — posting test claims to Moltbook to get real post IDs…");
+    claims = [];
+
+    for (const tmpl of DEMO_TEMPLATES) {
+      try {
+        const postId = await postToMoltbook(tmpl.title, tmpl.content, tmpl.submolt);
+        console.log(`     ✔ "${tmpl.title.slice(0, 55)}…"\n       postId: ${postId}`);
+        claims.push({
+          postId,
+          agentName:      "demo-agent",
+          claimType:      tmpl.claimType,
+          claimText:      tmpl.content,
+          extractedValue: tmpl.extractedValue,
+          asset:          tmpl.asset,
+        });
+      } catch (err) {
+        console.warn(`     ⚠ Could not post demo claim: ${errorMsg(err)}`);
+      }
+      await sleep(800);
+    }
+
+    console.log(`  ✔ ${claims.length} claim(s) posted — running verification pipeline…`);
   } else {
     let posts;
     try {
       posts = await fetchMoltbookPosts();
-      const tagged = posts as Array<{ _submolt?: string }>;
+      const tagged   = posts as Array<{ _submolt?: string }>;
       const submolts = [...new Set(tagged.map((p) => p._submolt ?? "unknown"))].join(", m/");
       console.log(`  ✔ Fetched ${posts.length} posts from m/${submolts}`);
     } catch (err) {
@@ -78,10 +121,10 @@ async function runCycle(): Promise<void> {
     return;
   }
 
-  // 3. Process each claim
+  // Process each claim
   for (const claim of claims) {
-    // 3a. Skip duplicates
-    if (isAlreadyVerified(claim.postId)) {
+    // In live mode skip already-processed posts; in demo mode all IDs are fresh
+    if (!DEMO_MODE && isAlreadyVerified(claim.postId)) {
       console.log(`  → Skip (already verified): post ${claim.postId}`);
       continue;
     }
@@ -91,41 +134,52 @@ async function runCycle(): Promise<void> {
     );
 
     try {
-      // 3b. Verify
+      // Verify
       const result = await verifyClaim(claim);
       console.log(
         `     Verdict: ${result.verdict} (${result.confidence}% confidence)\n` +
           `     ${result.details}`
       );
 
-      // 3c. On-chain proof (non-blocking — agent continues if this fails)
+      // On-chain proof (non-blocking)
       let txHash      = "0x" + "0".repeat(64);
       let verdictHash = txHash;
-
       try {
-        const proof   = await storeVerdictOnChain(claim.postId, result.verdict, result.confidence);
-        txHash        = proof.txHash;
-        verdictHash   = proof.verdictHash;
+        const proof = await storeVerdictOnChain(claim.postId, result.verdict, result.confidence);
+        txHash      = proof.txHash;
+        verdictHash = proof.verdictHash;
         console.log(`     ⛓  On-chain proof: ${txHash}`);
       } catch (err) {
         console.warn(`     ⚠  On-chain proof skipped: ${errorMsg(err)}`);
       }
 
-      // 3d. Post Moltbook comment (non-blocking)
+      // Build comment, optionally preview, then post
       let commentId: string | undefined;
       try {
-        const id  = await postVerdict(claim, result, txHash);
-        commentId = id ?? undefined;
-        console.log(`     💬 Moltbook comment posted${commentId ? ` (id: ${commentId})` : ""}`);
+        const commentText = buildVerdictComment(claim, result, txHash);
+
+        let shouldPost = true;
+        if (PREVIEW_MODE) {
+          console.log("\n  ┌─ PREVIEW ──────────────────────────────────────────────────");
+          commentText.split("\n").forEach((line) => console.log(`  │ ${line}`));
+          console.log("  └────────────────────────────────────────────────────────────");
+          shouldPost = await askYesNo("  Post this comment to Moltbook? (y/n): ");
+          if (!shouldPost) console.log("  → Skipped. Saving verdict without comment.");
+        }
+
+        if (shouldPost) {
+          const id  = await postVerdictComment(claim.postId, commentText);
+          commentId = id ?? undefined;
+          console.log(`     💬 Comment posted${commentId ? ` (id: ${commentId})` : ""}`);
+        }
       } catch (err) {
         console.warn(`     ⚠  Moltbook comment failed: ${errorMsg(err)}`);
       }
 
-      // 3e. Persist locally + sync to JSONBin
+      // Persist locally + sync to JSONBin
       await saveVerdict(claim, result, txHash, verdictHash, commentId);
       markAsVerified(claim.postId);
 
-      // Courtesy delay between posts to avoid hammering APIs
       await sleep(2500);
     } catch (err) {
       console.error(`  ✗ Error processing post ${claim.postId}:`, errorMsg(err));
@@ -140,11 +194,11 @@ async function runCycle(): Promise<void> {
 async function main(): Promise<void> {
   console.log("🔍 CRE Fact-Checker Agent starting…");
 
-  const modeLabel = DEMO_MODE
-    ? "demo (3 hardcoded claims)"
-    : RUN_ONCE
-      ? "single run (--once)"
-      : `polling every ${INTERVAL_MS / 60000} min`;
+  const modeLabel =
+    DEMO_MODE  ? `demo (post 3 real Moltbook claims + verify)${PREVIEW_MODE ? " + preview" : ""}` :
+    RUN_ONCE   ? `single run${PREVIEW_MODE ? " + preview" : ""}` :
+    `polling every ${INTERVAL_MS / 60000} min${PREVIEW_MODE ? " + preview" : ""}`;
+
   console.log(`   Mode: ${modeLabel}`);
 
   await runCycle();
@@ -155,7 +209,7 @@ async function main(): Promise<void> {
   }
 }
 
-// ─── Utils ───────────────────────────────────────────────────────────────────
+// ─── Utils ────────────────────────────────────────────────────────────────────
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
