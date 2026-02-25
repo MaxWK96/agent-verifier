@@ -40,6 +40,7 @@
     "artifacts",
     "cache-hardhat",
     "scripts",
-    "hardhat.config.ts"
+    "hardhat.config.ts",
+    "cre-workflow"
   ]
 }
