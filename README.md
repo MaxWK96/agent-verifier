@@ -42,8 +42,8 @@ CRE_ETH_PRIVATE_KEY=<your_sepolia_key> cre workflow simulate ./cre-workflow --no
 > Run all commands from the repository root (where `project.yaml` lives).
 
 **Evidence of successful simulation:**
-- Transaction hash: `0x40caf7a8426b850e5901777d8044afbc18e45096c97a157ff5c5ba0d8c9ad770`
-- Etherscan: https://sepolia.etherscan.io/tx/0x40caf7a8426b850e5901777d8044afbc18e45096c97a157ff5c5ba0d8c9ad770
+- Transaction hash: `0x79aa99a696bf0059e1c8319250e3a3046eff3da4d90e0a79e1c5bb2b8a3d9a40`
+- Etherscan: https://sepolia.etherscan.io/tx/0x79aa99a696bf0059e1c8319250e3a3046eff3da4d90e0a79e1c5bb2b8a3d9a40
 
 ---
 

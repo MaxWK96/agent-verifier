@@ -18,7 +18,7 @@ const REPO_URL     = "https://github.com/MaxWK96/agent-verifier";
 const USE_CASE_HASHTAGS = "#cre-ai #prediction-markets";
 
 // Evidence from our successful broadcast simulation
-const TX_HASH = "0x40caf7a8426b850e5901777d8044afbc18e45096c97a157ff5c5ba0d8c9ad770";
+const TX_HASH = "0x79aa99a696bf0059e1c8319250e3a3046eff3da4d90e0a79e1c5bb2b8a3d9a40";
 const EVIDENCE_LOGS = `
 [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
 [USER LOG] ================================================
@@ -29,17 +29,17 @@ const EVIDENCE_LOGS = `
 [USER LOG] PostID:    eth-usd-price-claim-1
 [USER LOG] Threshold: $3500
 [USER LOG] [1/3] Fetching ETH/USD price from CoinGecko via CRE HTTP...
-[USER LOG] ETH/USD: $1857.68
+[USER LOG] ETH/USD: $2063.84
 [USER LOG] [2/3] Evaluating claim...
-[USER LOG] ETH Price:  $1857.68
+[USER LOG] ETH Price:  $2063.84
 [USER LOG] Threshold:  $3500
 [USER LOG] Verdict:    FALSE
 [USER LOG] Confidence: 99%
 [USER LOG] Reasoning:  ETH is BELOW the $3500 threshold
 [USER LOG] [3/3] Writing verdict hash to VerdictRegistry on Sepolia...
 [USER LOG] Registry: 0x7576b99366a945BB29A087cA9bA467d28397288f
-[USER LOG] VerdictHash: 0x007ab667cbaa69ad9a0be5f000192ab63b4af5f0955740dd072d9741be09a8d7
-[USER LOG] Encoding storeVerdict(0x007ab667..., "FALSE")
+[USER LOG] VerdictHash: 0xd97aac7f387756ef40a6086b285511799cbdd714da8c9cccdfd936cf143b4de3
+[USER LOG] Encoding storeVerdict(0xd97aac7f..., "FALSE")
 [USER LOG] On-chain write successful. TxHash: ${TX_HASH}
 [USER LOG] FACT-CHECK COMPLETE | Verdict: FALSE | Confidence: 99%
 Workflow Simulation Result: "FALSE|99|${TX_HASH}"`.trim();
