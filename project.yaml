@@ -1,0 +1,15 @@
+# ==========================================================================
+# CRE Fact-Checker - Project Settings
+# ==========================================================================
+# Chainlink Convergence Hackathon 2026
+# CRE CLI project settings for Agent-verifier.
+
+staging-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://eth-sepolia.g.alchemy.com/v2/weUBYd5HWeZ4oafCRHiUR
+
+production-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://eth-sepolia.g.alchemy.com/v2/weUBYd5HWeZ4oafCRHiUR

@@ -1,0 +1,22 @@
+# ==========================================================================
+# CRE Fact-Checker - ETH Price Claim Verifier
+# ==========================================================================
+# Chainlink Convergence Hackathon 2026
+# Fetches ETH/USD via CRE HTTP, evaluates vs $3,500 threshold,
+# and writes verdict hash to VerdictRegistry on Sepolia.
+
+staging-settings:
+  user-workflow:
+    workflow-name: "cre-factchecker-staging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.json"
+    secrets-path: "./secrets.json"
+
+production-settings:
+  user-workflow:
+    workflow-name: "cre-factchecker-production"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.json"
+    secrets-path: "./secrets.json"

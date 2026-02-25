@@ -1,0 +1,12 @@
+{
+  "schedule": "0 */5 * * * *",
+  "registryAddress": "0x7576b99366a945BB29A087cA9bA467d28397288f",
+  "ethThreshold": 3500,
+  "postId": "eth-usd-price-claim-1",
+  "evms": [
+    {
+      "chainSelectorName": "ethereum-testnet-sepolia",
+      "gasLimit": "300000"
+    }
+  ]
+}

@@ -15,9 +15,13 @@
     "seed": "tsx scripts/seed-claim.ts",
     "register": "tsx scripts/register-agent.ts",
     "cleanup": "tsx scripts/cleanup.ts",
+    "force-delete": "tsx scripts/force-delete.ts",
     "delete-comment": "tsx scripts/delete-comment.ts",
     "compile": "npx hardhat compile",
-    "deploy:contract": "npx hardhat run scripts/deploy-verdict-registry.ts --network sepolia"
+    "deploy:contract": "npx hardhat run scripts/deploy-verdict-registry.ts --network sepolia",
+    "cre:simulate": "C:/Users/macki/Downloads/cre_windows_amd64/cre.exe workflow simulate ./cre-workflow --non-interactive --trigger-index 0 -T staging-settings",
+    "cre:broadcast": "C:/Users/macki/Downloads/cre_windows_amd64/cre.exe workflow simulate ./cre-workflow --non-interactive --trigger-index 0 -T staging-settings --broadcast",
+    "submit": "tsx scripts/submit.ts"
   },
   "dependencies": {
     "autoprefixer": "^10.4.24",

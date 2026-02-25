@@ -1,0 +1,17 @@
+{
+  "name": "cre-factchecker-workflow",
+  "version": "1.0.0",
+  "description": "CRE Workflow: ETH/USD fact-check with on-chain verdict",
+  "main": "dist/main.js",
+  "scripts": {
+    "postinstall": "node -e \"require('fs').copyFileSync('wasm/javy-chainlink-sdk.plugin.wasm','node_modules/@chainlink/cre-sdk-javy-plugin/dist/javy-chainlink-sdk.plugin.wasm')\""
+  },
+  "dependencies": {
+    "@chainlink/cre-sdk": "^1.0.7",
+    "viem": "2.34.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.21"
+  }
+}

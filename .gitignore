@@ -4,6 +4,11 @@
 
 # Node
 node_modules/
+!cre-workflow/wasm/
+
+# CRE build artifacts
+cre-workflow/tmp.js
+cre-workflow/tmp.wasm
 dist-agent/
 dist-hardhat/
 
@@ -19,6 +24,10 @@ typechain-types/
 # Memory (runtime state — not committed)
 memory/verdicts.json
 memory/verified-posts.json
+
+# Submission artifacts
+submission-draft.txt
+submission-record.json
 
 # OS
 .DS_Store

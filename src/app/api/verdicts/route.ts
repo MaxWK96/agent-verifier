@@ -5,6 +5,33 @@ import { readBin } from "@/lib/jsonbin";
 
 export const dynamic = "force-dynamic";
 
+// Build a topic key from the first 5 significant words of the claim text.
+// This catches duplicates that share the same opening (even with different endings)
+// e.g. "ETH will exceed $3,500 by end of week" and "ETH will exceed $3,500 by Sunday..."
+function claimTopicKey(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 5)
+    .join("");
+}
+
+// Deduplicate by claim topic (first 5 words), keeping only the most recent per topic.
+// Falls back to postId dedup for any remaining exact duplicates.
+function deduplicateVerdicts(verdicts: StoredVerdict[]): StoredVerdict[] {
+  const seenTopics = new Set<string>();
+  const seenIds    = new Set<string>();
+  return verdicts.filter((v) => {
+    const topic = claimTopicKey(v.claimText);
+    if (seenTopics.has(topic) || seenIds.has(v.postId)) return false;
+    seenTopics.add(topic);
+    seenIds.add(v.postId);
+    return true;
+  });
+}
+
 interface StoredVerdict {
   postId:       string;
   agentName:    string;
@@ -24,7 +51,8 @@ export async function GET() {
     // 1. Try JSONBin (populated by the live agent, works on Vercel)
     const binData = await readBin<StoredVerdict[]>([]);
     if (binData.length > 0) {
-      return NextResponse.json({ verdicts: binData.slice(0, 20), count: binData.length });
+      const deduped = deduplicateVerdicts(binData);
+      return NextResponse.json({ verdicts: deduped.slice(0, 20), count: deduped.length });
     }
 
     // 2. Fallback: local file (dev / self-hosted)
@@ -35,7 +63,7 @@ export async function GET() {
 
     const raw    = fs.readFileSync(filePath, "utf-8");
     const all    = JSON.parse(raw) as StoredVerdict[];
-    const last20 = Array.isArray(all) ? all.slice(0, 20) : [];
+    const last20 = Array.isArray(all) ? deduplicateVerdicts(all).slice(0, 20) : [];
 
     return NextResponse.json({ verdicts: last20, count: last20.length });
   } catch (err) {

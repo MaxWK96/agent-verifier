@@ -201,8 +201,8 @@ const LiveFeed = () => {
           {/* Cards */}
           <div className="md:col-span-8 space-y-3">
             <AnimatePresence>
-              {visible.map((claim) => (
-                <AgentClaimCard key={claim.id} claim={claim} darkMode />
+              {visible.map((claim, i) => (
+                <AgentClaimCard key={`${claim.id}-${i}`} claim={claim} darkMode />
               ))}
             </AnimatePresence>
 
