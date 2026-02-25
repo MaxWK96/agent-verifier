@@ -1,5 +1,6 @@
 import HeroSection from "@/components/HeroSection";
 import HowItWorks from "@/components/HowItWorks";
+import CREWorkflow from "@/components/CREWorkflow";
 import LiveFeed from "@/components/LiveFeed";
 import TechStack from "@/components/TechStack";
 
@@ -8,6 +9,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <HeroSection />
       <HowItWorks />
+      <CREWorkflow />
       <LiveFeed />
       <TechStack />
 
