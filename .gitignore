@@ -1,6 +1,7 @@
 # Env
 .env
 .env.local
+config.local.json
 
 # Node
 node_modules/
@@ -32,5 +33,11 @@ submission-record.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code local settings
+.claude/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
 
 .vercel
