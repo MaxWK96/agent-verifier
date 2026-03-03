@@ -9,6 +9,25 @@ Fetches posts, verifies price/weather/DeFi claims against real data sources, sto
 
 ---
 
+## The problem your project addresses
+
+Autonomous agents post unverifiable price predictions and market claims on social platforms. There is no trustless, on-chain mechanism to audit whether these claims are TRUE or FALSE at the time they are made. Without a verifiable, timestamped record, a wrong prediction silently disappears — no accountability exists for agent-generated content.
+
+## How you've addressed the problem
+
+A CRE TypeScript workflow fetches the live ETH/USD price from CoinGecko via CRE's HTTP capability, evaluates it against a $3,500 threshold (the claim being verified), computes a verdict hash, and writes it to a `VerdictRegistry` smart contract on Sepolia via CRE's on-chain write capability. The workflow calls `storeVerdict(bytes32 verdictHash, string verdict)` on-chain — the verdict hash is `keccak256(abi.encodePacked(postId, verdict, confidence, timestamp))` — creating an immutable, verifiable record of every fact-check. A Next.js frontend displays live verdicts from a Moltbook social feed alongside Etherscan proof links.
+
+## How you've used CRE
+
+The CRE workflow (`cre-workflow/main.ts`) uses four CRE capabilities:
+
+- **HTTPClient** — fetches live ETH/USD price from CoinGecko (`api.coingecko.com`) inside the DON's sandboxed WASM environment
+- **CronCapability** — triggers the workflow on a schedule (every 5 minutes)
+- **EVMClient + runtime.report()** — generates a DON-signed consensus report and submits it on-chain to VerdictRegistry on Sepolia
+- **ConsensusAggregationByFields with `median` reducer** — multiple DON nodes independently fetch the price and agree on the median before any on-chain write, making the result manipulation-resistant
+
+---
+
 ## Chainlink Integration Files
 
 | File | Purpose |
@@ -22,6 +41,8 @@ Fetches posts, verifies price/weather/DeFi claims against real data sources, sto
 
 ## How to Run CRE Simulation
 
+Requires CRE CLI: https://docs.chain.link/chainlink-nodes/cre/getting-started/cli-installation
+
 ```bash
 # 1. Install root dependencies
 npm install
@@ -30,15 +51,17 @@ npm install
 #    (postinstall auto-copies the Javy WASM plugin — no manual step needed)
 cd cre-workflow && npm install && cd ..
 
-# 3. Run simulation (dry-run, no broadcast)
+# 3. Replace YOUR_ALCHEMY_KEY_HERE in project.yaml with your Sepolia RPC URL
+#    e.g. https://eth-sepolia.g.alchemy.com/v2/<your_key>
+
+# 4. Run simulation (dry-run, no broadcast)
 cre workflow simulate ./cre-workflow --non-interactive --trigger-index 0 -T staging-settings
 
-# 4. Run with on-chain broadcast (produces real tx hash)
+# 5. Run with on-chain broadcast (produces real tx hash)
 #    Requires CRE_ETH_PRIVATE_KEY environment variable
 CRE_ETH_PRIVATE_KEY=<your_sepolia_key> cre workflow simulate ./cre-workflow --non-interactive --trigger-index 0 -T staging-settings --broadcast
 ```
 
-> The CRE CLI binary must be installed. Download from https://github.com/smartcontractkit/cre-cli/releases
 > Run all commands from the repository root (where `project.yaml` lives).
 
 **Evidence of successful simulation:**
