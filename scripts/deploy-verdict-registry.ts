@@ -7,6 +7,10 @@
 import pkg from "hardhat";
 const { ethers } = pkg as typeof import("hardhat");
 import * as dotenv from "dotenv";
+
+// MockKeystoneForwarder on Sepolia — the CRE infrastructure contract
+// that calls onReport(bytes metadata, bytes report) on receiver contracts.
+const FORWARDER = "0x15fC6ae953E024d975e77382eEeC56A9101f9F88";
 import * as fs   from "fs";
 import * as path from "path";
 
@@ -23,6 +27,7 @@ async function main(): Promise<void> {
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`  Network:   ${network.name} (chainId: ${network.chainId})`);
   console.log(`  Deployer:  ${deployer.address}`);
+  console.log(`  Forwarder: ${FORWARDER}`);
   console.log(`  Balance:   ${ethers.formatEther(balance)} ETH`);
 
   if (balance === 0n) {
@@ -40,7 +45,7 @@ async function main(): Promise<void> {
   }
 
   const Factory  = await ethers.getContractFactory("VerdictRegistry");
-  const contract = await Factory.deploy();
+  const contract = await Factory.deploy(FORWARDER);
 
   const deployTx = contract.deploymentTransaction();
   console.log(`\n  Deploy tx: ${deployTx?.hash ?? "unknown"}`);

@@ -1,6 +1,6 @@
 {
   "schedule": "0 */5 * * * *",
-  "registryAddress": "0x7576b99366a945BB29A087cA9bA467d28397288f",
+  "registryAddress": "0xff687eC2191d3EE6DDF28Ee806B45c8D837C128E",
   "ethThreshold": 3500,
   "postId": "eth-usd-price-claim-1",
   "evms": [
