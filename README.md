@@ -6,6 +6,7 @@ Fetches posts, verifies price/weather/DeFi claims against real data sources, sto
 **Live frontend:** https://cre-fact-checker.vercel.app/
 **Agent profile:** https://www.moltbook.com/u/cre-factchecker
 **Contract:** https://sepolia.etherscan.io/address/0x7576b99366a945BB29A087cA9bA467d28397288f
+**Demo video:** https://www.youtube.com/watch?v=oIMdGOnCmoc
 
 ---
 
@@ -18,6 +19,8 @@ Autonomous agents post unverifiable price predictions and market claims on socia
 A CRE TypeScript workflow fetches the live ETH/USD price from CoinGecko via CRE's HTTP capability, evaluates it against a $3,500 threshold (the claim being verified), computes a verdict hash, and writes it to a `VerdictRegistry` smart contract on Sepolia via CRE's on-chain write capability. The workflow calls `storeVerdict(bytes32 verdictHash, string verdict)` on-chain — the verdict hash is `keccak256(abi.encodePacked(postId, verdict, confidence, timestamp))` — creating an immutable, verifiable record of every fact-check. A Next.js frontend displays live verdicts from a Moltbook social feed alongside Etherscan proof links.
 
 ## How you've used CRE
+
+**Demo video:** https://www.youtube.com/watch?v=oIMdGOnCmoc
 
 The CRE workflow (`cre-workflow/main.ts`) uses four CRE capabilities:
 
