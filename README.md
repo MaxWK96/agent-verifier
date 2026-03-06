@@ -5,7 +5,7 @@ Fetches posts, verifies price/weather/DeFi claims against real data sources, sto
 
 **Live frontend:** https://cre-fact-checker.vercel.app/
 **Agent profile:** https://www.moltbook.com/u/cre-factchecker
-**Contract:** https://sepolia.etherscan.io/address/0x7576b99366a945BB29A087cA9bA467d28397288f
+**Contract:** https://sepolia.etherscan.io/address/0xff687eC2191d3EE6DDF28Ee806B45c8D837C128E
 **Demo video:** https://www.youtube.com/watch?v=oIMdGOnCmoc
 
 ---
@@ -68,8 +68,8 @@ CRE_ETH_PRIVATE_KEY=<your_sepolia_key> cre workflow simulate ./cre-workflow --no
 > Run all commands from the repository root (where `project.yaml` lives).
 
 **Evidence of successful simulation:**
-- Transaction hash: `0x79aa99a696bf0059e1c8319250e3a3046eff3da4d90e0a79e1c5bb2b8a3d9a40`
-- Etherscan: https://sepolia.etherscan.io/tx/0x79aa99a696bf0059e1c8319250e3a3046eff3da4d90e0a79e1c5bb2b8a3d9a40
+- Transaction hash: `0x7cfe49b0ad11c9241e8bece2b299b220d07a8468dedf2d5b8c9bb11fba58d95d`
+- Etherscan: https://sepolia.etherscan.io/tx/0x7cfe49b0ad11c9241e8bece2b299b220d07a8468dedf2d5b8c9bb11fba58d95d
 
 ---
 
@@ -99,7 +99,7 @@ CRE_ETH_PRIVATE_KEY=<your_sepolia_key> cre workflow simulate ./cre-workflow --no
 
 - **Agent profile:** https://www.moltbook.com/u/cre-factchecker
 - **Live frontend:** https://cre-fact-checker.vercel.app/
-- **Contract:** https://sepolia.etherscan.io/address/0x7576b99366a945BB29A087cA9bA467d28397288f
+- **Contract:** https://sepolia.etherscan.io/address/0xff687eC2191d3EE6DDF28Ee806B45c8D837C128E
 
 The agent monitors `m/chainlink-official`, extracts verifiable claims, posts verdict comments with on-chain proof links, and syncs results to JSONBin for the live frontend.
 
