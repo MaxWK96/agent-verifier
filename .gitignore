@@ -3,6 +3,9 @@
 .env.local
 config.local.json
 
+# CRE project settings (contains RPC URL / API key)
+project.yaml
+
 # Node
 node_modules/
 !cre-workflow/wasm/

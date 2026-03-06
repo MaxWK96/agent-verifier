@@ -54,8 +54,11 @@ npm install
 #    (postinstall auto-copies the Javy WASM plugin — no manual step needed)
 cd cre-workflow && npm install && cd ..
 
-# 3. Replace YOUR_ALCHEMY_KEY_HERE in project.yaml with your Sepolia RPC URL
+# 3. Create project.yaml from the example and add your Alchemy Sepolia RPC URL
+cp project.yaml.example project.yaml
+#    Open project.yaml and replace YOUR_ALCHEMY_KEY_HERE with your key
 #    e.g. https://eth-sepolia.g.alchemy.com/v2/<your_key>
+#    Get a free key at https://dashboard.alchemy.com
 
 # 4. Run simulation (dry-run, no broadcast)
 cre workflow simulate ./cre-workflow --non-interactive --trigger-index 0 -T staging-settings
@@ -66,6 +69,7 @@ CRE_ETH_PRIVATE_KEY=<your_sepolia_key> cre workflow simulate ./cre-workflow --no
 ```
 
 > Run all commands from the repository root (where `project.yaml` lives).
+> Install the CRE CLI first: https://github.com/smartcontractkit/cre-cli/releases
 
 **Evidence of successful simulation:**
 - Transaction hash: `0x7cfe49b0ad11c9241e8bece2b299b220d07a8468dedf2d5b8c9bb11fba58d95d`
